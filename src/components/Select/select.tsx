@@ -16,11 +16,13 @@ interface SelectProps {
   placeholder?: string
   required?: boolean
   className?: string
+  onValueChange?: (value: string) => void
+  onOpenChange?: (open: boolean) => void
 }
 
-export function Select({ name, options, placeholder, required, className }: SelectProps) {
+export function Select({ name, options, placeholder, required, className, onValueChange, onOpenChange }: SelectProps) {
   return (
-    <SelectRoot name={name} required={required}>
+    <SelectRoot name={name} required={required} onValueChange={onValueChange} onOpenChange={onOpenChange}>
       <SelectTrigger className={twMerge('w-full h-auto py-2 border border-white/20 rounded-sm bg-transparent text-white', className)}>
         <SelectValue placeholder={placeholder ?? 'Selecione...'} />
       </SelectTrigger>
