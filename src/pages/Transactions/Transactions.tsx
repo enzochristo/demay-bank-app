@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { PaperPlaneTiltIcon, CheckCircleIcon } from '@phosphor-icons/react'
 import { sendTransaction } from '@/services/transactions'
-import { seekUsers } from '@/utils/seeker/seeker'
+import { getUsers } from '@/services/users'
+import { getUserId } from '@/services/auth'
 import { Select } from '@/components/Select/select'
 import type { SelectOption } from '@/components/Form/types'
 
@@ -13,11 +14,18 @@ export default function Transactions() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
+  const currentUserId = getUserId()
+
   function handleOpenChange(open: boolean) {
     if (open) {
-      seekUsers('').then((users) =>
-        setUserOptions(users.map((u) => ({ label: u.nome, value: u.id })))
-      ).catch(() => {})
+      getUsers()
+        .then((users) => {
+          const options = users
+            .filter((u) => Number(u.id) !== currentUserId)
+            .map((u) => ({ label: `${u.nome} (ID: ${u.id})`, value: String(u.id) }))
+          setUserOptions(options)
+        })
+        .catch(() => {})
     }
   }
 
@@ -26,8 +34,19 @@ export default function Transactions() {
     setError(null)
     setSuccess(false)
     setLoading(true)
+
+    if (currentUserId === null) {
+      setError('User session not found. Please log in again.')
+      setLoading(false)
+      return
+    }
+
     try {
-      await sendTransaction({ id_receptor: recipientId, valor: parseFloat(valor) })
+      await sendTransaction({
+        id_sender: currentUserId,
+        id_receptor: Number(recipientId),
+        valor: parseFloat(valor),
+      })
       setSuccess(true)
       setRecipientId('')
       setValor('')

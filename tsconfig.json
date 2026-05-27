@@ -5,6 +5,7 @@
     "moduleResolution": "bundler",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["vite/client"]
   }
 }
